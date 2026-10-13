@@ -8,7 +8,7 @@ const ctx=new Proxy({}, {get:(o,k)=>k in o?o[k]:(k==='createLinearGradient'?()=>
 function element(id){if(!elements.has(id))elements.set(id,{style:{},classList:{add(){},remove(){}},textContent:'',innerHTML:'',addEventListener(){},setPointerCapture(){},click(){this.onclick?.()}});return elements.get(id)}
 let passed=0;
 for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
- for(let n=1;n<=120;n++){
+ for(let n=1;n<=18;n++){
   const frames=[],elements=new Map();
   function freshElement(id){if(!elements.has(id))elements.set(id,{style:{},classList:{add(){},remove(){}},textContent:'',innerHTML:'',addEventListener(){},setPointerCapture(){},click(){this.onclick?.()}});return elements.get(id)}
   const handlers={};const document={getElementById:freshElement,querySelectorAll:()=>[],addEventListener(type,fn){handlers[type]=fn},hidden:false};
@@ -20,6 +20,7 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   assert.ok(debug,'Diagnostic physics snapshot available at stage '+n);
   const start=debug.snapshot();
   assert.equal(start.level,n);
+  assert.equal(sandbox.window.PULSEFALL_TEST_REPORT().geometryPassed,18,'All 18 stages have valid geometry');
   freshElement('play').click();
   handlers.keydown({code:'ArrowRight',repeat:false,preventDefault(){}});
   handlers.keydown({code:'Space',repeat:false,preventDefault(){}});
@@ -34,8 +35,8 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   handlers.keyup({code:'ArrowRight'});
   const after=debug.snapshot();
   assert.ok(after.time>0,'Physics simulation continued '+label+' stage '+n);
-  assert.ok(freshElement('score').textContent.includes('STAGE '+n+'/120'),'Stage '+n+' initialized in '+label);
+  assert.ok(freshElement('score').textContent.includes('STAGE '+n+'/18'),'Stage '+n+' initialized in '+label);
   passed++;
  }
 }
-console.log('PASS: '+passed+' startup/render/movement/gravity/dash smoke checks across 120 stages in portrait and landscape. Does not prove solvability.');
+console.log('PASS: '+passed+' startup/render/movement/gravity/dash smoke checks across 18 stages in portrait and landscape. Does not prove solvability.');
