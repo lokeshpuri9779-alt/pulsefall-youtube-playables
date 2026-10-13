@@ -29,3 +29,10 @@ Static route estimates and 60-frame smoke checks are not full-playthrough eviden
 ## Change policy
 
 Fix release blockers first. Every fix must rerun the 18-stage smoke tests. Avoid new features until this gate passes.
+
+## Release candidate build (October 2026)
+
+- The 18-stage game is frozen for release-candidate review.
+- Smoke-test assertions were updated to recognize Echo objectives on stages 7, 10, 13 and 16.
+- Assistant-run simulated startup/movement/gravity/dash checks: 36/36 passed (18 stages × portrait/landscape) using two-frame action assertions. This is not an end-to-end completion test.
+- Final live-site, physical touch-device, and new Echo full-playthrough verification are **not** complete. This build is a **release candidate**, not a certified final production release.
