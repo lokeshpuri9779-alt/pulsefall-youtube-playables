@@ -11,15 +11,19 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
  for(let n=1;n<=120;n++){
   const frames=[],elements=new Map();
   function freshElement(id){if(!elements.has(id))elements.set(id,{style:{},classList:{add(){},remove(){}},textContent:'',innerHTML:'',addEventListener(){},setPointerCapture(){},click(){this.onclick?.()}});return elements.get(id)}
-  const document={getElementById:freshElement,querySelectorAll:()=>[],addEventListener(){},hidden:false};
+  const handlers={};const document={getElementById:freshElement,querySelectorAll:()=>[],addEventListener(type,fn){handlers[type]=fn},hidden:false};
   freshElement('game').getContext=()=>ctx;
   const sandbox={document,window:{addEventListener(){}},location:{search:'?diagnostics=1&testStage='+n},innerWidth:width,innerHeight:height,devicePixelRatio:1,performance:{now:()=>0},requestAnimationFrame(fn){frames.push(fn)},localStorage:{getItem(){return null},setItem(){throw Error('test mode attempted to save')},removeItem(){throw Error('test mode attempted to delete save')}},Math,Number,Set,Array,console:{warn(){}},URLSearchParams,addEventListener(){}};
   vm.runInNewContext(js,sandbox,{timeout:1500,filename:'pulsefall.js'});
   assert.ok(frames.length,'Animation scheduled at stage '+n);
   freshElement('play').click();
-  for(let i=1;i<=10;i++){assert.ok(frames.length,'Frame scheduled '+label+' stage '+n);frames.shift()(i*16.67)}
+  handlers.keydown({code:'ArrowRight',repeat:false,preventDefault(){}});
+  handlers.keydown({code:'Space',repeat:false,preventDefault(){}});
+  handlers.keydown({code:'ShiftLeft',repeat:false,preventDefault(){}});
+  for(let i=1;i<=60;i++){assert.ok(frames.length,'Frame scheduled '+label+' stage '+n);frames.shift()(i*16.67)}
+  handlers.keyup({code:'ArrowRight'});
   assert.ok(freshElement('score').textContent.includes('STAGE '+n+'/120'),'Stage '+n+' initialized in '+label);
   passed++;
  }
 }
-console.log('PASS: '+passed+' startup/render/gameplay-frame smoke checks across 120 stages in portrait and landscape. Does not prove solvability.');
+console.log('PASS: '+passed+' startup/render/movement/gravity/dash smoke checks across 120 stages in portrait and landscape. Does not prove solvability.');
