@@ -16,12 +16,21 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   const sandbox={document,window:{addEventListener(){}},location:{search:'?diagnostics=1&testStage='+n},innerWidth:width,innerHeight:height,devicePixelRatio:1,performance:{now:()=>0},requestAnimationFrame(fn){frames.push(fn)},localStorage:{getItem(){return null},setItem(){throw Error('test mode attempted to save')},removeItem(){throw Error('test mode attempted to delete save')}},Math,Number,Set,Array,console:{warn(){}},URLSearchParams,addEventListener(){}};
   vm.runInNewContext(js,sandbox,{timeout:1500,filename:'pulsefall.js'});
   assert.ok(frames.length,'Animation scheduled at stage '+n);
+  const debug=sandbox.window.PULSEFALL_DEBUG;
+  assert.ok(debug,'Diagnostic physics snapshot available at stage '+n);
+  const start=debug.snapshot();
+  assert.equal(start.level,n);
   freshElement('play').click();
   handlers.keydown({code:'ArrowRight',repeat:false,preventDefault(){}});
   handlers.keydown({code:'Space',repeat:false,preventDefault(){}});
   handlers.keydown({code:'ShiftLeft',repeat:false,preventDefault(){}});
   for(let i=1;i<=60;i++){assert.ok(frames.length,'Frame scheduled '+label+' stage '+n);frames.shift()(i*16.67)}
   handlers.keyup({code:'ArrowRight'});
+  const after=debug.snapshot();
+  assert.ok(after.time>0,'Physics time advanced '+label+' stage '+n);
+  assert.ok(after.player.x>start.player.x,'Right movement advanced '+label+' stage '+n);
+  assert.equal(after.player.g,-1,'Gravity reversed '+label+' stage '+n);
+  assert.ok(after.player.dashCooldown>0,'Dash activated '+label+' stage '+n);
   assert.ok(freshElement('score').textContent.includes('STAGE '+n+'/120'),'Stage '+n+' initialized in '+label);
   passed++;
  }
