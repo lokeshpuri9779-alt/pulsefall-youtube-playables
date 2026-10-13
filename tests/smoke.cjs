@@ -7,15 +7,19 @@ const elements=new Map();
 const ctx=new Proxy({}, {get:(o,k)=>k in o?o[k]:(k==='createLinearGradient'?()=>({addColorStop(){}}):()=>{}),set:(o,k,v)=>(o[k]=v,true)});
 function element(id){if(!elements.has(id))elements.set(id,{style:{},classList:{add(){},remove(){}},textContent:'',innerHTML:'',addEventListener(){},setPointerCapture(){},click(){this.onclick?.()}});return elements.get(id)}
 let passed=0;
-for(let n=1;n<=120;n++){
- const frames=[];
- const document={getElementById:element,querySelectorAll:()=>[],addEventListener(){},hidden:false};
- const sandbox={document,window:{addEventListener(){}},location:{search:'?diagnostics=1&testStage='+n},innerWidth:390,innerHeight:844,devicePixelRatio:1,performance:{now:()=>0},requestAnimationFrame(fn){frames.push(fn)},localStorage:{getItem(){return null},setItem(){throw Error('test mode attempted to save')},removeItem(){throw Error('test mode attempted to delete save')}},Math,Number,Set,Array,console:{warn(){}},URLSearchParams};
- element('game').getContext=()=>ctx;
- vm.runInNewContext(js,sandbox,{timeout:1500,filename:'pulsefall.js'});
- assert.ok(frames.length,'Animation scheduled at stage '+n);
- frames.shift()(16.67);
- assert.ok(element('score').textContent.includes('STAGE '+n+'/120'),'Stage '+n+' initialized');
- passed++;
+for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
+ for(let n=1;n<=120;n++){
+  const frames=[],elements=new Map();
+  function freshElement(id){if(!elements.has(id))elements.set(id,{style:{},classList:{add(){},remove(){}},textContent:'',innerHTML:'',addEventListener(){},setPointerCapture(){},click(){this.onclick?.()}});return elements.get(id)}
+  const document={getElementById:freshElement,querySelectorAll:()=>[],addEventListener(){},hidden:false};
+  freshElement('game').getContext=()=>ctx;
+  const sandbox={document,window:{addEventListener(){}},location:{search:'?diagnostics=1&testStage='+n},innerWidth:width,innerHeight:height,devicePixelRatio:1,performance:{now:()=>0},requestAnimationFrame(fn){frames.push(fn)},localStorage:{getItem(){return null},setItem(){throw Error('test mode attempted to save')},removeItem(){throw Error('test mode attempted to delete save')}},Math,Number,Set,Array,console:{warn(){}},URLSearchParams,addEventListener(){}};
+  vm.runInNewContext(js,sandbox,{timeout:1500,filename:'pulsefall.js'});
+  assert.ok(frames.length,'Animation scheduled at stage '+n);
+  freshElement('play').click();
+  for(let i=1;i<=10;i++){assert.ok(frames.length,'Frame scheduled '+label+' stage '+n);frames.shift()(i*16.67)}
+  assert.ok(freshElement('score').textContent.includes('STAGE '+n+'/120'),'Stage '+n+' initialized in '+label);
+  passed++;
+ }
 }
-console.log('PASS: parsed, initialized and rendered '+passed+' stages (not playthrough solvability).');
+console.log('PASS: '+passed+' startup/render/gameplay-frame smoke checks across 120 stages in portrait and landscape. Does not prove solvability.');
