@@ -25,6 +25,10 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   assert.equal(start.timeLimitSeconds,expectedObjective==='rush'?45:90,'Correct time limit at stage '+n);
   if(expectedObjective==='ordered')assert.equal(start.nextPulse,1,'First ordered pulse is active at stage '+n);
   assert.equal(sandbox.window.PULSEFALL_TEST_REPORT().geometryPassed,18,'All 18 stages have valid geometry');
+  const routeReport=sandbox.window.PULSEFALL_TEST_REPORT();
+  assert.equal(routeReport.routeBudgetPassed,18,'All 18 route estimates fit time budgets');
+  assert.equal(routeReport.routeAudits.length,18,'All stages have route audits');
+  assert.equal(routeReport.routeAudits[n-1].hazardOrbConflicts,0,'No hazard-pulse overlaps at stage '+n);
   freshElement('play').click();
   handlers.keydown({code:'ArrowRight',repeat:false,preventDefault(){}});
   handlers.keydown({code:'Space',repeat:false,preventDefault(){}});
