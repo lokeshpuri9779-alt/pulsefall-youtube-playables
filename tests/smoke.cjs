@@ -20,6 +20,10 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   assert.ok(debug,'Diagnostic physics snapshot available at stage '+n);
   const start=debug.snapshot();
   assert.equal(start.level,n);
+  const expectedObjective=[8,11,14,17].includes(n)?'ordered':[9,12,15,18].includes(n)?'rush':'free';
+  assert.equal(start.objective,expectedObjective,'Correct objective at stage '+n);
+  assert.equal(start.timeLimitSeconds,expectedObjective==='rush'?45:90,'Correct time limit at stage '+n);
+  if(expectedObjective==='ordered')assert.equal(start.nextPulse,1,'First ordered pulse is active at stage '+n);
   assert.equal(sandbox.window.PULSEFALL_TEST_REPORT().geometryPassed,18,'All 18 stages have valid geometry');
   freshElement('play').click();
   handlers.keydown({code:'ArrowRight',repeat:false,preventDefault(){}});
