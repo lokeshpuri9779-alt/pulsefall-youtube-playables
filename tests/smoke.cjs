@@ -20,9 +20,10 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   assert.ok(debug,'Diagnostic physics snapshot available at stage '+n);
   const start=debug.snapshot();
   assert.equal(start.level,n);
-  const expectedObjective=[8,11,14,17].includes(n)?'ordered':[9,12,15,18].includes(n)?'rush':'free';
+  const expectedObjective=[7,10,13,16].includes(n)?'echo':[8,11,14,17].includes(n)?'ordered':[9,12,15,18].includes(n)?'rush':'free';
   assert.equal(start.objective,expectedObjective,'Correct objective at stage '+n);
   assert.equal(start.timeLimitSeconds,expectedObjective==='rush'?45:90,'Correct time limit at stage '+n);
+  if(expectedObjective==='echo')assert.equal(start.echoFramesRemaining,0,'Echo window starts closed at stage '+n);
   if(expectedObjective==='ordered')assert.equal(start.nextPulse,1,'First ordered pulse is active at stage '+n);
   assert.equal(sandbox.window.PULSEFALL_TEST_REPORT().geometryPassed,18,'All 18 stages have valid geometry');
   const routeReport=sandbox.window.PULSEFALL_TEST_REPORT();
@@ -39,6 +40,7 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   assert.ok(activated.player.x>start.player.x,'Right movement advanced '+label+' stage '+n);
   assert.equal(activated.player.g,-1,'Gravity reversed before any restart '+label+' stage '+n);
   assert.ok(activated.player.dashCooldown>0,'Dash activated before any restart '+label+' stage '+n);
+  if(expectedObjective==='echo')assert.ok(activated.echoFramesRemaining>0,'Echo window activates on gravity shift '+label+' stage '+n);
   for(let i=3;i<=60;i++){assert.ok(frames.length,'Frame scheduled '+label+' stage '+n);frames.shift()(i*16.67)}
   handlers.keyup({code:'ArrowRight'});
   const after=debug.snapshot();
