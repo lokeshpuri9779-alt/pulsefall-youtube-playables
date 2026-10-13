@@ -47,4 +47,20 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   passed++;
  }
 }
-console.log('PASS: '+passed+' startup/render/movement/gravity/dash smoke checks across 18 stages in portrait and landscape. Does not prove solvability.');
+
+{
+ const frames=[],elements=new Map();
+ function get(id){if(!elements.has(id))elements.set(id,{style:{},classList:{add(){},remove(){}},textContent:'',innerHTML:'',addEventListener(){},setPointerCapture(){},click(){this.onclick?.()}});return elements.get(id)}
+ const handlers={};const document={getElementById:get,querySelectorAll:()=>[],addEventListener(type,fn){handlers[type]=fn},hidden:false};
+ get('game').getContext=()=>ctx;
+ const sandbox={document,window:{addEventListener(){}},location:{search:'?diagnostics=1&testStage=9'},innerWidth:390,innerHeight:844,devicePixelRatio:1,performance:{now:()=>0},requestAnimationFrame(fn){frames.push(fn)},localStorage:{getItem(){return null},setItem(){throw Error('test mode saved progress')},removeItem(){throw Error('test mode deleted progress')}},Math,Number,Set,Array,console:{warn(){}},URLSearchParams,addEventListener(){}};
+ vm.runInNewContext(js,sandbox,{timeout:1500,filename:'pulsefall.js'});
+ get('play').click();
+ for(let i=1;i<=3000;i++){assert.ok(frames.length,'Rush frame '+i);frames.shift()(i*16.67)}
+ assert.equal(sandbox.window.PULSEFALL_DEBUG.snapshot().mode,'menu','Rush timeout stops gameplay');
+ assert.match(get('description').innerHTML,/45-second rush expired/,'Rush timeout explains failure');
+ assert.equal(sandbox.window.PULSEFALL_DEBUG.snapshot().level,9,'Rush retry stays on the same stage');
+ console.log('PASS: Stage 9 rush timer expires and resets without changing stage.');
+}
+
+console.log('PASS: '+passed' startup/render/movement/gravity/dash smoke checks across 18 stages in portrait and landscape. Does not prove solvability.');
