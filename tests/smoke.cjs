@@ -24,13 +24,16 @@ for(const [width,height,label] of [[390,844,'portrait'],[960,540,'landscape']]){
   handlers.keydown({code:'ArrowRight',repeat:false,preventDefault(){}});
   handlers.keydown({code:'Space',repeat:false,preventDefault(){}});
   handlers.keydown({code:'ShiftLeft',repeat:false,preventDefault(){}});
-  for(let i=1;i<=60;i++){assert.ok(frames.length,'Frame scheduled '+label+' stage '+n);frames.shift()(i*16.67)}
+  for(let i=1;i<=2;i++){assert.ok(frames.length,'Frame scheduled '+label+' stage '+n);frames.shift()(i*16.67)}
+  const activated=debug.snapshot();
+  assert.ok(activated.time>0,'Physics time advanced '+label+' stage '+n);
+  assert.ok(activated.player.x>start.player.x,'Right movement advanced '+label+' stage '+n);
+  assert.equal(activated.player.g,-1,'Gravity reversed before any restart '+label+' stage '+n);
+  assert.ok(activated.player.dashCooldown>0,'Dash activated before any restart '+label+' stage '+n);
+  for(let i=3;i<=60;i++){assert.ok(frames.length,'Frame scheduled '+label+' stage '+n);frames.shift()(i*16.67)}
   handlers.keyup({code:'ArrowRight'});
   const after=debug.snapshot();
-  assert.ok(after.time>0,'Physics time advanced '+label+' stage '+n);
-  assert.ok(after.player.x>start.player.x,'Right movement advanced '+label+' stage '+n);
-  assert.equal(after.player.g,-1,'Gravity reversed '+label+' stage '+n);
-  assert.ok(after.player.dashCooldown>0,'Dash activated '+label+' stage '+n);
+  assert.ok(after.time>0,'Physics simulation continued '+label+' stage '+n);
   assert.ok(freshElement('score').textContent.includes('STAGE '+n+'/120'),'Stage '+n+' initialized in '+label);
   passed++;
  }
